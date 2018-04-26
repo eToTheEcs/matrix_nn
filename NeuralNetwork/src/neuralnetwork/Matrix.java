@@ -185,6 +185,14 @@ public class Matrix {
         return c;
     }
     
+    public double get(int i, int j) {
+        return m[i][j];
+    }
+    
+    public void set(int i, int j, double val) {
+        m[i][j] = val;
+    }
+    
     @Override
     public String toString() {
         

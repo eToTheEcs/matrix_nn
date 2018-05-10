@@ -6,7 +6,7 @@
 package DataFetcher;
 
 /**
- *
+ * definisce i metodi che un'oggetto di un train set deve implementare
  * @author Nicolas Benatti
  */
 public interface TrainSetItem {

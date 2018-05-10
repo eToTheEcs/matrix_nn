@@ -52,7 +52,7 @@ public class TrainData {
         for(int i = 0; i < rows; ++i) {
             for(int j = 0; j < cols; ++j) {
                 
-                res[i+cols*j] = img[i][j];
+                res[j+cols*i] = img[i][j];
             }
         }
         

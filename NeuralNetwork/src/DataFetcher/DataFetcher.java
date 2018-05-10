@@ -5,8 +5,17 @@
  */
 package DataFetcher;
 
+import java.awt.Point;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.ComponentSampleModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,19 +30,21 @@ import javax.imageio.ImageIO;
 public class DataFetcher {
     
     private String dataFileName, labelsFileName;
-    private DataInputStream dataFile, labelFile;
+    //private DataInputStream dataFile, labelFile;
     
-    private int h, w, numItems, free;
+    private int h, w, numItems, usedItems;
     
     private TrainData[] data;
-    private int[] labels;
+    private byte[] labels;
     
     public DataFetcher(String dfn, String lfn) {
         
         dataFileName = dfn;
         labelsFileName = lfn;
         
-        free = h = w = 0;
+        usedItems = h = w = 0;
+        
+        DataInputStream dataFile = null, labelFile = null;
         
         try {
             dataFile = new DataInputStream(new FileInputStream(dataFileName));
@@ -60,42 +71,102 @@ public class DataFetcher {
             }
             catch(IOException e) { System.out.println(e); } 
         }
+                
+        labels = new byte[numItems+1];
+        data = new TrainData[numItems+1];
     }
     
     // gets all the test data from the file
     public void fetchAllData() {
         
-        int i, j;
-        byte intensity = 0;
+        int i, j, k;
+        byte intensity = (byte)0;
+        
+        DataInputStream dataFile = null, labelFile = null;
         
         try {
             
             dataFile = new DataInputStream(new FileInputStream(dataFileName));
-            labelFile = new DataInputStream(new FileInputStream(labelsFileName));
+            labelFile = new DataInputStream(new FileInputStream(labelsFileName));            
             
-            free = -1;
+            dataFile.skip(16);
+            labelFile.skip(8);
             
+            for(k = 0; k < numItems; ++k, ++usedItems) {
+                data[usedItems] = new TrainData(h, w);
+                labels[usedItems] = labelFile.readByte();
+                for(i = 0; i < h; ++i) {
+                    for(j = 0; j < w; ++j) {
+                        
+                        intensity = dataFile.readByte();
+                        
+                        /*int tmp;
+                        
+                        if(intensity < 0) {
+                            tmp =  (byte)(intensity + (byte)256);
+                        }*/
+                        
+                        data[usedItems].set(i, j, intensity);    // the image comes flipped in the file
+                    }
+                }
                 
-            for(i = 0; i < h; i = (i+1)%h) {
-                if(i == 0) {
-                    labels[free] = labelFile.readByte();
-                    free++;
-                    data[free] = new TrainData(h, w);
-                }
-                for(j = 0; j < h; j = ++j) {
-                    intensity = dataFile.readByte();
-                    
-                    if(intensity == -1) break;
-                    
-                    data[free].set(i, j, intensity);
-                }
+                //System.out.println("read item no. " + usedItems);
             }
         }
         catch(IOException e) {
             System.out.println("DataFetcher::fetchAllData: " + e.getMessage());
         }
         finally {
+            try {
+                dataFile.close();
+                labelFile.close();
+            }
+            catch(IOException e) { System.out.println(e); } 
+        }
+    }
+    
+    public void fetchSomeItems(int howMany) {
+        
+        if(howMany > numItems)
+            throw new IllegalArgumentException("DataFetcher::fetchSomeData: too much items to fetch");
+        
+        int i, j, k;
+        byte intensity = (byte)0;
+        
+        DataInputStream dataFile = null, labelFile = null;
+        
+        try {
             
+            dataFile = new DataInputStream(new FileInputStream(dataFileName));
+            labelFile = new DataInputStream(new FileInputStream(labelsFileName));            
+            
+            dataFile.skip(16);
+            labelFile.skip(8);
+            
+            for(k = 0; k < howMany; ++k, ++usedItems) {
+                data[usedItems] = new TrainData(h, w);
+                labels[usedItems] = labelFile.readByte();
+                for(i = 0; i < h; ++i) {
+                    for(j = 0; j < w; ++j) {
+                        
+                        intensity = dataFile.readByte();
+                        
+                        data[usedItems].set(j, i, intensity);    // the image comes flipped in the file
+                    }
+                }
+                
+                //System.out.println("read item no. " + usedItems);
+            }
+        }
+        catch(IOException e) {
+            System.out.println("DataFetcher::fetchAllData: " + e.getMessage());
+        }
+        finally {
+            try {
+                dataFile.close();
+                labelFile.close();
+            }
+            catch(IOException e) { System.out.println(e); } 
         }
     }
     
@@ -116,18 +187,47 @@ public class DataFetcher {
     }
     
     //NOTE: only for debug purposes
-    public void showElementAt(int i) {
+    public void saveElementAt(int i) {
         
-        ByteArrayInputStream bais = new ByteArrayInputStream(data[i].getRaw());
+        if(i > usedItems)
+            throw new IllegalArgumentException("DataFetcher::saveElementAt: index out of bounds");
         
-        BufferedImage imgFromRaw = null;
+        byte[] rawImage = data[i].getRaw();
+        
+        //TODO: all this stuff could also be done by a class
+        
+        // setup color configuration
+        
+        ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
+        ColorModel cm = new ComponentColorModel(cs, new int[] {8}, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        
+        // create writable raster
+        
+        DataBufferByte dbb = new DataBufferByte(new byte[][] {rawImage}, rawImage.length);
+        ComponentSampleModel csm = new ComponentSampleModel(DataBuffer.TYPE_BYTE, w, h, 1, w, new int[] {0});
+        WritableRaster raster = Raster.createWritableRaster(csm, dbb, new Point(0, 0));
+        
+        BufferedImage image = new BufferedImage(cm, raster, false, null);
         
         try {
-            imgFromRaw = ImageIO.read(bais);
-            ImageIO.write(imgFromRaw, "jpg", new File("ciao.jpg"));
+            ImageIO.write(image, "jpg", new File("img" + i + ".jpg"));
         }
         catch(IOException e) {
             System.out.println(e);
         }
+        
+        System.out.println("image created");
+    }
+
+    public int getH() {
+        return h;
+    }
+
+    public int getW() {
+        return w;
+    }
+
+    public int getNumItems() {
+        return numItems;
     }
 }

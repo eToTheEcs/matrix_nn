@@ -48,10 +48,26 @@ public class Matrix {
                 m[i][j] = other.m[i][j];
     }
 
+    public Matrix(int _r, int _c, byte[] vals) {
+        
+        this(_r, _c);
+        
+        int i, j, ctr = 0;
+        
+        for(i = 0; i < _r; ++i) {
+            for(j = 0; j < _c; ++j) {
+                
+                m[i][j] = vals[/*j+_c*i*/ctr++];
+            }
+        }
+    } 
+    
+    
+    
     public static Matrix sub(Matrix x, Matrix y) {
         
         if(x.r != y.r || x.c != y.c) {
-            throw new MatrixOutOfBoundsException("Matrix::sub(), matrix dimensions don't match");
+            throw new MatrixOutOfBoundsException("Matrix::sub(), matrix dimensions don't match: ("+x.r+"x"+x.c+") vs ("+y.r+"x"+y.c+")");
         }
         
         int i, j;
@@ -103,15 +119,15 @@ public class Matrix {
     public static Matrix mult(Matrix x, Matrix y) {
         
         if(x.c != y.r) {
-            throw new MatrixOutOfBoundsException("Matrix::mult() cols of 1st matrix and rows of 2nd matrix don't match");
+            throw new MatrixOutOfBoundsException("Matrix::mult() cols of 1st matrix(" + x.r + ", " + x.c + ") and rows of 2nd matrix(" + y.r + ", " + y.c + ") don't match");
         }
         
-        Matrix res = new Matrix(x.c, y.r);
+        Matrix res = new Matrix(x.r, y.c);
         
         int i, j, k, sum;
         
         for(i = 0; i < x.r; ++i) {
-            for(j = 0; j < x.c; ++j) {
+            for(j = 0; j < y.c; ++j) {
                 sum = 0;
                 for(k = 0; k < y.r; ++k) {
                     sum += x.m[i][k] * y.m[k][j];
@@ -148,8 +164,8 @@ public class Matrix {
         
         Matrix res = new Matrix(m.c, m.r);
         
-        for(i = 0; i < m.r; ++i)
-            for(j =0; j < m.c; ++j)
+        for(i = 0; i < m.c; ++i)
+            for(j =0; j < m.r; ++j)
                 res.m[i][j] = m.m[j][i];
         
         return res;
@@ -210,6 +226,8 @@ public class Matrix {
         
         return res;
     }
+    
+    
     
     /*@Override
     protected Object clone() throws CloneNotSupportedException {

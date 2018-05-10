@@ -16,9 +16,9 @@ public class NeuralNetwork {
     
     private Matrix wIH, wHO, inputs, outputs, desired, errors, /*biasIH, biasHO*/outH;
     
-    private int numInputNodes, numHiddenNodes, numOutputNodes;
+    private final int numInputNodes, numHiddenNodes, numOutputNodes;    // is never a good idea to change nn's dimension while it's working...
     
-    private double learningRate;
+    private final double learningRate;
     private final double MUTATION_RATE = 0.15;
     
     
@@ -78,21 +78,33 @@ public class NeuralNetwork {
         outH.forEach(actFunction);
         
         // output layer's input
-        outputs = Matrix.mult(outH, wHO);
+        outputs = Matrix.mult(wHO, outH);
         outputs.forEach(actFunction);
         
-        return outputs;
+        return new Matrix(outputs);
+    }
+    
+    public Matrix feed(byte[] in) {
+        
+        Matrix toFeed = new Matrix(in.length, 1, in);
+        
+        return this.feed(toFeed);
     }
     
     // propagates the error back in the network
+    
+    //TODO: some bugs...
+    
     public void backpropagate() {
         
         // D - O 
         Matrix errVectorO = computeErrorVector(desired, outputs);
         
+        System.out.println(outputs.getR() + ", " + outputs.getC());
+        
         Matrix gradients = Matrix.forEach(outputs, NnUtils.sigmoid.getDerivative());
         
-        gradients = Matrix.mult(gradients, errVectorO);
+        gradients = Matrix.mult(gradients, Matrix.transpose(errVectorO));
         gradients.scale(this.learningRate);
         
         Matrix wHT = Matrix.transpose(outH);

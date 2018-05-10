@@ -5,8 +5,6 @@
  */
 package neuralnetwork;
 
-import java.util.function.Function;
-
 /**
  *
  * @author Nicolas Benatti

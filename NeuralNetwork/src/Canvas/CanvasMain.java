@@ -3,25 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package DataFetcher;
+package Canvas;
+
+import javax.swing.JFrame;
 
 /**
  *
  * @author Nicolas Benatti
  */
-public class DfTest {
+public class CanvasMain {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         
-        DataFetcher df = new DataFetcher("train-images.idx3-ubyte", "train-labels.idx1-ubyte");
+        Canvas cvs = Canvas.getInstance();
         
-        df.fetchAllData();
-                        
-        for(int i = 0; i < 100; ++i)
-            df.saveElementAt(i);
+        cvs.setThicknessX(10);
+        cvs.setThicknessY(10);
+        cvs.setLocationRelativeTo(null);
+        cvs.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        cvs.pack();
+        cvs.setVisible(true);
     }
     
 }

@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.util.List;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 import javax.swing.JFrame;
 
@@ -17,7 +18,7 @@ import javax.swing.JFrame;
  * this class implements singleton design pattern
  * @author Nicolas Benatti
  */
-public class Canvas extends JFrame implements MouseListener {
+public class Canvas extends JFrame implements MouseMotionListener {
 
     private static Canvas instance = null;
     
@@ -31,7 +32,7 @@ public class Canvas extends JFrame implements MouseListener {
         pts = new LinkedList<Pair<Integer, Integer>>();
         thicknessX = thicknessY = 5;
         
-        addMouseListener(this);
+        addMouseMotionListener(this);
         setPreferredSize(new Dimension(600, 480));
     }
     
@@ -69,7 +70,7 @@ public class Canvas extends JFrame implements MouseListener {
         this.thicknessY = thicknessY;
     }
     
-    @Override
+    /*@Override
     public void mouseClicked(MouseEvent me) {
         System.out.println("you clicked the mouse");
         //mouseX = me.getX();
@@ -80,7 +81,7 @@ public class Canvas extends JFrame implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent me) {
-        System.out.println("mouse in pressed state");
+        System.out.println("mouse in pressed state, position: ("+me.getX()+", "+me.getY()+")");
         pts.add(new Pair<Integer, Integer>(me.getX(), me.getY()));
         repaint();
     }
@@ -92,5 +93,18 @@ public class Canvas extends JFrame implements MouseListener {
     public void mouseEntered(MouseEvent me) {}
 
     @Override
-    public void mouseExited(MouseEvent me) {}
+    public void mouseExited(MouseEvent me) {}*/
+
+    @Override
+    public void mouseDragged(MouseEvent me) {
+        System.out.println("mouse in dragged state");
+        
+        pts.add(new Pair<Integer, Integer>(me.getX(), me.getY()));
+        repaint();
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent me) {
+        System.out.println("mouse in moved state");
+    }
 }

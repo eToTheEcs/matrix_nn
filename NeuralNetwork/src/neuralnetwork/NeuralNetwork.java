@@ -63,12 +63,12 @@ public class NeuralNetwork {
         numOutputNodes = other.numOutputNodes;
     }
     
-    // says to the network what are the target outputs
+    // tells the network what are the target outputs
     public void setDesiredOutputs(Matrix des) {
         desired = new Matrix(des);
     }
     
-    // feeds the input values all the way to the outputs
+    // feeds the input values all the way to the outputs, returning the probability vector produced by the last layer
     public Matrix feed(Matrix in) {
         
         inputs = new Matrix(in);
@@ -96,7 +96,7 @@ public class NeuralNetwork {
     //TODO: some bugs...
     
     public void backpropagate() {
-        
+                
         // D - O 
         Matrix errVectorO = computeErrorVector(desired, outputs);
         

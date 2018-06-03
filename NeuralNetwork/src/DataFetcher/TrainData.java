@@ -44,7 +44,7 @@ public class TrainData {
         return cols;
     }
     
-    // returns raw byte-array representation of the image
+    // returns raw byte-array representation of the image (this method HAS TO be included in the TrainableData interface
     public byte[] getRaw() {
         
         byte[] res = new byte[rows * cols];

@@ -13,7 +13,7 @@ import java.util.Objects;
  * @param <F> type of the first item
  * @param <S> type of the second item
  */
-public class Pair<F extends Comparable, S extends Comparable> implements Cloneable {
+public class Pair<F extends Comparable<F>, S extends Comparable<S>> implements Cloneable {
     
     private F first;
     private S second;
@@ -42,7 +42,7 @@ public class Pair<F extends Comparable, S extends Comparable> implements Cloneab
     
     @Override
     public String toString() {
-        return "["+first+", "+second+"]";
+        return "("+first+", "+second+")";
     }
 
     @Override
@@ -65,6 +65,10 @@ public class Pair<F extends Comparable, S extends Comparable> implements Cloneab
         return hash;
     }
     
+    /**
+     * performs deep copy of the object
+     * @return
+     */
     @Override
     public Object clone() {
         

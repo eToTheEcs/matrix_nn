@@ -221,7 +221,7 @@ public class Matrix {
                 res += "|" + m[i][j] + " ";
             }
             
-            res += "|" + m[i][j] + "\n";
+            res += "|" + m[i][j] + "|\n";
         }
         
         return res;

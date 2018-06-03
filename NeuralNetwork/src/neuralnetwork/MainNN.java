@@ -52,18 +52,20 @@ public class MainNN {
                 
                 Matrix actualOutputs = nn.feed(df.getElementAt(i).getRaw());
                 
-                nn.backpropagate();
+                //nn.backpropagate();
+                
+                System.out.println(actualOutputs);
                 
                 System.out.println("desired output: " + df.getLabelAt(i));
-                System.out.println("actual output vector: " + actualOutputs);
-                System.out.println("desired output vector: " + desiredOuts);
+                System.out.println("actual output vector: \n" + actualOutputs);
+                System.out.println("desired output vector: \n" + desiredOuts);
             }
             
             epochs++;
         }
         
         
-        
+        System.out.println("the network has been trained");
     }
     
 }
